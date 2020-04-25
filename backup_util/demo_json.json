@@ -1,0 +1,6 @@
+{
+  "sources": ["project/src"],
+  "destination": "dest",
+  "exceptions": ["node_modules"],
+  "dry_run": true
+}
