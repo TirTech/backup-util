@@ -1,0 +1,16 @@
+{
+  "latest": {
+    "name": "Backup_2020-06-14",
+    "timestamp": "2020-06-14"
+  },
+  "records": [
+    {
+      "name": "Backup_2020-06-14",
+      "timestamp": "2020-06-14"
+    },
+    {
+      "name": "Backup_name_here",
+      "timestamp": "2020-05-12"
+    }
+  ]
+}

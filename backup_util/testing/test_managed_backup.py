@@ -4,7 +4,7 @@ import os
 import testing.testutils as testutils
 from testing.testutils import test_file_dir, rel_path
 
-from Backup import Backup
+from ManagedBackup import ManagedBackup
 from testing.FileTree import FileTree
 from exception.ValidationException import ValidationException
 
@@ -25,7 +25,7 @@ def test_test():
 
 
 def test_validation(filetree):
-    b = Backup(True)
+    b = ManagedBackup(True)
     with pytest.raises(ValidationException):  # No sources
         b.validate()
     b.add_source(rel_path("test"))
@@ -43,23 +43,7 @@ def test_validation(filetree):
 
 
 def test_backup_simple(filetree):
-    b = Backup(False)
-    b.add_source(rel_path("testdir1"))
-    filetree\
-        .dir("testdir1")\
-            .file("testfile1")\
-            .up()\
-        .dir("dest1")\
-        .build()
-    b.set_destination(rel_path("dest1"))
-    b.execute()
-    b.wait_for_completion()
-    assert os.path.exists(rel_path("dest1/testdir1/testfile1"))
-    log.info(f"Result in dest was \n{testutils.list_files(rel_path('dest1'))}")
-
-
-def test_backup_with_wrapper(filetree):
-    b = Backup(dry_run=False, use_wrapper=True)
+    b = ManagedBackup(dry_run=False)
     b.add_source(rel_path("testdir1"))
     filetree \
         .dir("testdir1") \
@@ -77,41 +61,42 @@ def test_backup_with_wrapper(filetree):
 
 
 def test_backup_exclusions(filetree):
-    b = Backup(False)
+    b = ManagedBackup(False)
     b.add_source(rel_path("testdir1"))
 
-    filetree\
+    filetree \
         .dir("testdir1") \
-            .file("testfile1") \
-            .dir("testdir2") \
-                .file("extestfile2") \
-                .root()\
-        .dir("dest1")\
+        .file("testfile1") \
+        .dir("testdir2") \
+        .file("extestfile2") \
+        .root() \
+        .dir("dest1") \
         .build()
 
     b.add_exception("ex*")
     b.set_destination(rel_path("dest1"))
     b.execute()
     b.wait_for_completion()
-    assert os.path.exists(rel_path("dest1/testdir1/testfile1"))
-    assert not os.path.exists(rel_path("dest1/testdir1/testdir2/extestfile2"))
+    wrapper = os.listdir(rel_path("dest1"))[0]
+    assert os.path.exists(rel_path(f"dest1/{wrapper}/testdir1/testfile1"))
+    assert not os.path.exists(rel_path(f"dest1/{wrapper}/testdir1/testdir2/extestfile2"))
     log.info(f"Result in dest was \n{testutils.list_files(rel_path('dest1'))}")
 
 
 def test_load_json_backup(filetree):
     data = '{"sources": ["_test_temp_\\\\testdir1","_test_temp_\\\\testdir2"],"exceptions": ["ex*"],"destination": "_test_temp_\\\\dest1","dry_run": false}'
-    filetree\
-        .file("test.json", data)\
-        .dir("testdir1")\
-            .file("testfile1")\
-            .up()\
-        .dir("testdir2")\
-            .file("extestfile2")\
-            .up()\
-        .dir("dest1")\
+    filetree \
+        .file("test.json", data) \
+        .dir("testdir1") \
+        .file("testfile1") \
+        .up() \
+        .dir("testdir2") \
+        .file("extestfile2") \
+        .up() \
+        .dir("dest1") \
         .build()
-    src,exc,dest,dry,wrapped,managed = Backup.load_from_json(rel_path("test.json"))
-    b = Backup(dry_run=dry, use_wrapper=wrapped)
+    src,exc,dest,dry,wrapped,managed = ManagedBackup.load_from_json(rel_path("test.json"))
+    b = ManagedBackup(dry_run=dry)
     b.set_destination(dest)
     for s in src:
         b.add_source(s)
@@ -120,19 +105,20 @@ def test_load_json_backup(filetree):
     log.info(f"Backup was loaded as {str(b)}")
     b.execute()
     b.wait_for_completion()
-    assert os.path.exists(rel_path("dest1/testdir1/testfile1"))
-    assert os.path.exists(rel_path("dest1/testdir2"))
-    assert not os.path.exists(rel_path("dest1/testdir2/extestfile2"))
+    wrapper = os.listdir(rel_path("dest1"))[0]
+    assert os.path.exists(rel_path(f"dest1/{wrapper}/testdir1/testfile1"))
+    assert os.path.exists(rel_path(f"dest1/{wrapper}/testdir2"))
+    assert not os.path.exists(rel_path(f"dest1/{wrapper}/testdir2/extestfile2"))
     log.info(f"Result in dest was \n{testutils.list_files(rel_path('dest1'))}")
 
 
 def test_file_tree(filetree):
-    filetree\
-        .dir("A")\
-            .dir("A1")\
-                .file("A1_F1")\
-                .up()\
-            .dir("A2")\
-                .file("A2_F1")\
-                .file("A2_F2")\
+    filetree \
+        .dir("A") \
+        .dir("A1") \
+        .file("A1_F1") \
+        .up() \
+        .dir("A2") \
+        .file("A2_F1") \
+        .file("A2_F2") \
         .build()

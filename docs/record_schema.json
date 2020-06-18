@@ -1,0 +1,17 @@
+{
+  "name": "Backup_2020-06-10",
+  "folder": "Backup_2020-06-10",
+  "timestamp": "2020-06-10",
+  "files": [
+    {
+      "file": "/Documents/Stuff/file1.txt",
+      "hash": "whatever42SomeTHing36",
+      "source": "Backup_2020-05-30"
+    },
+    {
+      "file": "/Documents/Stuff/file2.txt",
+      "hash": "SomeTHing325Else594",
+      "source": "Backup_2020-06-10"
+    }
+  ]
+}

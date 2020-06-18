@@ -45,14 +45,15 @@ class Backup:
             json.dump(data, jfile)
 
     @staticmethod
-    def load_from_json(path: str) -> Tuple[list, list, str, bool, bool]:
+    def load_from_json(path: str) -> Tuple[list, list, str, bool, bool, bool]:
         with open(path, "r") as jfile:
             data = json.load(jfile)
             return (data["sources"],
                     data["exceptions"],
                     data["destination"],
                     data["dry_run"] if "dry_run" in data else False,
-                    data["use_wrapper"] if "use_wrapper" in data else False)
+                    data["use_wrapper"] if "use_wrapper" in data else False,
+                    data["managed"] if "managed" in data else False)
 
     def execute(self) -> Queue:
         self.validate()
