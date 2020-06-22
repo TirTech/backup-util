@@ -1,4 +1,6 @@
-from tkinter import LabelFrame, LEFT, NW, BOTH, Entry, X, Checkbutton, Button, filedialog as filedialog
+from tkinter import LabelFrame, LEFT, NW, BOTH, Entry, X, Checkbutton, Button, filedialog as filedialog, BOTTOM
+
+from records import MetaRecord
 from ui.ui_model import UIModel
 
 
@@ -18,7 +20,24 @@ class DestinationFrame(LabelFrame):
         self.btn_dest_browse = Button(self, text="Browse", command=self.set_dest)
         self.btn_dest_browse.pack()
 
+        self.btn_make_managed = Button(self, text="Manage This Folder", command=self.set_managed)
+        self.btn_make_managed.pack(side=BOTTOM)
+
+        self.model.var_managed.trace_add("write", self.managed_changed)
+
+    def managed_changed(self, *args):
+        self.set_managed(self.model.var_managed.get())
+
+    def set_managed(self, val=True):
+        if val:
+            self.chk_wrap.configure(state="disabled")
+            self.btn_make_managed.configure(text="Already Managed", state="disabled")
+        else:
+            self.chk_wrap.configure(state="normal")
+            self.btn_make_managed.configure(text="Manage This Folder", state="normal")
+
     def set_dest(self):
         dest = filedialog.askdirectory(title="Choose Destination")
         if dest is not None:
             self.model.var_dest.set(dest)
+            self.model.var_managed.set(MetaRecord.is_managed(dest))

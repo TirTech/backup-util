@@ -14,3 +14,6 @@ class UIModel:
 
         self.lstvar_exc = Variable()
         self.lstvar_exc.set([])
+
+        self.var_managed = BooleanVar()
+        self.var_managed.set(False)

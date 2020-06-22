@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from queue import Queue
 from time import sleep
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 from exception.ValidationException import ValidationException
 import os
@@ -45,15 +45,14 @@ class Backup:
             json.dump(data, jfile)
 
     @staticmethod
-    def load_from_json(path: str) -> Tuple[list, list, str, bool, bool, bool]:
+    def load_from_json(path: str) -> Tuple[list, list, str, bool, bool]:
         with open(path, "r") as jfile:
             data = json.load(jfile)
             return (data["sources"],
                     data["exceptions"],
                     data["destination"],
                     data["dry_run"] if "dry_run" in data else False,
-                    data["use_wrapper"] if "use_wrapper" in data else False,
-                    data["managed"] if "managed" in data else False)
+                    data["use_wrapper"] if "use_wrapper" in data else False)
 
     def execute(self) -> Queue:
         self.validate()
@@ -61,9 +60,9 @@ class Backup:
 
         data_queue = Queue()
         if not self.dry_run:
-            self.thread = Thread(target=self._backup_thread, args=[data_queue])
+            self.thread = ThrowingThread(target=self._backup_thread, args=[data_queue])
         else:
-            self.thread = Thread(target=self._backup_thread_dry, args=[data_queue])
+            self.thread = ThrowingThread(target=self._backup_thread_dry, args=[data_queue])
 
         self.thread.start()
         return data_queue
@@ -104,7 +103,9 @@ class Backup:
 
     def wait_for_completion(self):
         if self.thread is not None and self.thread.is_alive():
-            self.thread.join()
+            e = self.thread.join()
+            if e is not None:
+                raise e
 
     def validate(self):
         """
@@ -136,3 +137,22 @@ class BackupUpdate:
 
     def is_minor(self):
         return self.minor
+
+
+class ThrowingThread(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs=None, *, daemon=None):
+        super().__init__(group=group, target=target, name=name,
+                         args=args, kwargs=kwargs, daemon=daemon)
+        self.exception = None
+
+    def run(self):
+        self.exception = None
+        try:
+            super().run()
+        except BaseException as e:
+            self.exception = e
+
+    def join(self, timeout=None) -> BaseException:
+        super().join(timeout)
+        return self.exception

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import utils
 
@@ -59,18 +59,30 @@ class MetaRecord:
         self.path = path
 
     @classmethod
-    def load_from(cls, path: str) -> MetaRecord:
+    def load_from(cls, path: str) -> Optional[MetaRecord]:
         abspath = os.path.join(path, record_folder, metarecord_name)
         if os.path.exists(abspath) and os.path.isfile(abspath):
             with open(abspath, "r") as file:
                 data = json.load(file)
                 return cls(data, path)
+        else:
+            return None
+
+    @staticmethod
+    def is_managed(path: str) -> bool:
+        abspath = os.path.join(path, record_folder, metarecord_name)
+        return os.path.exists(abspath) and os.path.isfile(abspath)
 
     @classmethod
     def create_new(cls, path: str):
         return cls({"records": []}, path)
 
     def load_latest_record(self) -> Record:
+        """
+        Loads the latest record for this managed folder.
+
+        :return: the latest record
+        """
         if self.latest is not None:
             return Record.load_from(self.path, self.latest.name)
         else:
@@ -150,9 +162,10 @@ class Record:
         else:
             raise NotADirectoryError(f"The path {self.path} does not exist or is not a directory")
 
-    def add_file(self, abs_path: str, relative_path: str, source: str = None) -> None:
+    def add_file(self, abs_path: str, relative_path: str, source: str = None) -> FileData:
         file = FileData(relative_path, utils.hash_file(abs_path), source if source is not None else self.name)
         self.files.append(file)
+        return file
 
     def data_path(self) -> str:
         return os.path.join(self.path, self.folder)

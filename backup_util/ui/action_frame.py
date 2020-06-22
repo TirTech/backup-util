@@ -3,8 +3,11 @@ from queue import Queue
 from tkinter import Frame, BOTTOM, X, TOP, StringVar, Label, W, DoubleVar, ttk as ttk, Button, RIGHT, BooleanVar, \
     Checkbutton, LEFT, filedialog as filedialog
 from typing import Union
+
+from ManagedBackup import ManagedBackup
 from Backup import Backup, BackupUpdate
 from exception.ValidationException import ValidationException
+from records import MetaRecord
 from ui.ui_model import UIModel
 
 
@@ -36,7 +39,8 @@ class ActionFrame(Frame):
             self.run_backup(
                 list(self.model.lstvar_src.get()),
                 list(self.model.lstvar_exc.get()),
-                self.model.var_dest.get())
+                self.model.var_dest.get(),
+                self.model.var_managed.get())
 
         self.frm_btns = Frame(self, padx=10, pady=10)
         self.frm_btns.pack(side=TOP, fill=X)
@@ -61,12 +65,13 @@ class ActionFrame(Frame):
         file: str = filedialog.askopenfilename(title="Save Configuration",
                                                filetypes=(("JSON files", "*.json"), ("All Files", "*.*")))
         if file is not None and len(file.strip()) > 0:
-            src, exc, dest, dry, wrap, managed = Backup.load_from_json(file)
+            src, exc, dest, dry, wrap = Backup.load_from_json(file)
             self.model.lstvar_src.set(src)
             self.model.lstvar_exc.set(exc)
             self.model.var_dest.set(dest)
             self.var_dry.set(dry)
             self.model.var_wrap.set(wrap)
+            self.model.var_managed.set(MetaRecord.is_managed(dest))
 
     def save_backup(self):
         file: str = filedialog.asksaveasfilename(title="Save Configuration",
@@ -80,10 +85,12 @@ class ActionFrame(Frame):
                                 self.var_dry.get(),
                                 self.model.var_wrap.get())
 
-    def run_backup(self, sources: list, exceptions: list, destination: str):
+    def run_backup(self, sources: list, exceptions: list, destination: str, managed: bool):
         self.var_prog.set(0)
         self.var_stat.set("Ready")
-        self.bk = Backup(dry_run=self.var_dry.get(), use_wrapper=self.model.var_wrap.get())
+        self.bk = \
+            Backup(dry_run=self.var_dry.get(), use_wrapper=self.model.var_wrap.get()) if not managed else \
+            ManagedBackup(dry_run=self.var_dry.get())
         for s in sources:
             self.bk.add_source(s)
         for e in exceptions:

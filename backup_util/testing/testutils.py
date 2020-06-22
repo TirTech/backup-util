@@ -4,9 +4,9 @@ import shutil
 test_file_dir = "_test_temp_"
 
 
-def rel_path(path: str) -> str:
+def rel_path(*path: str) -> str:
     "create a path relative to the testing file directory"
-    return os.path.join(test_file_dir, path)
+    return os.path.join(test_file_dir, *path)
 
 
 # From https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
