@@ -4,7 +4,7 @@ from queue import Queue
 from time import sleep
 from typing import Union, Tuple
 
-from exception.ValidationException import ValidationException
+from backup_util.exception.ValidationException import ValidationException
 import os
 import shutil
 import json
@@ -60,9 +60,9 @@ class Backup:
 
         data_queue = Queue()
         if not self.dry_run:
-            self.thread = Thread(target=self._backup_thread, args=[data_queue])
+            self.thread = ThrowingThread(target=self._backup_thread, args=[data_queue])
         else:
-            self.thread = Thread(target=self._backup_thread_dry, args=[data_queue])
+            self.thread = ThrowingThread(target=self._backup_thread_dry, args=[data_queue])
 
         self.thread.start()
         return data_queue
@@ -103,7 +103,9 @@ class Backup:
 
     def wait_for_completion(self):
         if self.thread is not None and self.thread.is_alive():
-            self.thread.join()
+            e = self.thread.join()
+            if e is not None:
+                raise e
 
     def validate(self):
         """
@@ -120,7 +122,10 @@ class Backup:
                 raise ValidationException(f"Validation failed: Source path {source} does not exist")
 
     def __str__(self):
-        return f"Backup[dry_run={self.dry_run},sources={str(self.sources)},destination={str(self.destination)},exceptions={str(self.exceptions)}]"
+        return f"Backup[dry_run={self.dry_run}," \
+               f"sources={str(self.sources)}," \
+               f"destination={str(self.destination)}," \
+               f"exceptions={str(self.exceptions)}]"
 
 
 class BackupUpdate:
@@ -135,3 +140,22 @@ class BackupUpdate:
 
     def is_minor(self):
         return self.minor
+
+
+class ThrowingThread(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs=None, *, daemon=None):
+        super().__init__(group=group, target=target, name=name,
+                         args=args, kwargs=kwargs, daemon=daemon)
+        self.exception = None
+
+    def run(self):
+        self.exception = None
+        try:
+            super().run()
+        except BaseException as e:
+            self.exception = e
+
+    def join(self, timeout=None) -> BaseException:
+        super().join(timeout)
+        return self.exception
