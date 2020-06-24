@@ -4,11 +4,11 @@ from tkinter import Frame, BOTTOM, X, TOP, StringVar, Label, W, DoubleVar, ttk a
     Checkbutton, LEFT, filedialog as filedialog
 from typing import Union
 
-from ManagedBackup import ManagedBackup
-from Backup import Backup, BackupUpdate
-from exception.ValidationException import ValidationException
-from records import MetaRecord
-from ui.ui_model import UIModel
+from backup_util.ManagedBackup import ManagedBackup
+from backup_util.Backup import Backup, BackupUpdate
+from backup_util.exception.ValidationException import ValidationException
+from backup_util.records import MetaRecord
+from .ui_model import UIModel
 
 
 class ActionFrame(Frame):

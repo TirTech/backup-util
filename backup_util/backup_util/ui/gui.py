@@ -1,11 +1,11 @@
 from tkinter import PhotoImage, Frame, TOP, BOTH, Tk
 
-from icon import icon
-from ui.action_frame import ActionFrame
-from ui.destination_frame import DestinationFrame
-from ui.exclusion_frame import ExclusionFrame
-from ui.source_frame import SourceFrame
-from ui.ui_model import UIModel
+from backup_util.icon import icon
+from .action_frame import ActionFrame
+from .destination_frame import DestinationFrame
+from .exclusion_frame import ExclusionFrame
+from .source_frame import SourceFrame
+from .ui_model import UIModel
 
 
 class GUI:

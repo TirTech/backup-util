@@ -4,9 +4,9 @@ from time import sleep
 
 import pytest
 
-from records import MetaRecord, record_ext, record_folder, metarecord_name, Record
-from testing.FileTree import FileTree
-from testing.testutils import test_file_dir, temp_cleanup, rel_path
+from backup_util.records import MetaRecord, record_ext, record_folder, metarecord_name, Record
+from backup_util.testing.FileTree import FileTree
+from backup_util.testing.testutils import test_file_dir, temp_cleanup, rel_path
 
 log = logging.getLogger(__name__)
 

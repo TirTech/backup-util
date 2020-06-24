@@ -4,7 +4,7 @@ from queue import Queue
 from time import sleep
 from typing import Union, Tuple
 
-from exception.ValidationException import ValidationException
+from backup_util.exception.ValidationException import ValidationException
 import os
 import shutil
 import json

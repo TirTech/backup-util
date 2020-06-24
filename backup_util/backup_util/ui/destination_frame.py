@@ -1,7 +1,7 @@
 from tkinter import LabelFrame, LEFT, NW, BOTH, Entry, X, Checkbutton, Button, filedialog as filedialog, BOTTOM
 
-from records import MetaRecord
-from ui.ui_model import UIModel
+from backup_util.records import MetaRecord
+from .ui_model import UIModel
 
 
 class DestinationFrame(LabelFrame):

@@ -5,9 +5,9 @@ from datetime import datetime
 from queue import Queue
 from typing import Optional
 
-import utils
-from Backup import Backup, BackupUpdate
-from records import Record, MetaRecord, NoRecordError
+from backup_util import utils
+from backup_util.Backup import Backup, BackupUpdate
+from backup_util.records import Record, MetaRecord, NoRecordError
 
 log = logging.getLogger(__name__)
 record_folder = ".records"

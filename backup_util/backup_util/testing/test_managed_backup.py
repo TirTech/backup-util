@@ -4,11 +4,11 @@ from time import sleep
 
 import pytest
 
-import testing.testutils as testutils
-from ManagedBackup import ManagedBackup
-from exception.ValidationException import ValidationException
-from testing.FileTree import FileTree
-from testing.testutils import test_file_dir, rel_path
+import backup_util.testing.testutils as testutils
+from backup_util.ManagedBackup import ManagedBackup
+from backup_util.exception.ValidationException import ValidationException
+from backup_util.testing.FileTree import FileTree
+from backup_util.testing.testutils import test_file_dir, rel_path
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ def test_backup_exclusions(filetree):
 
 
 def test_load_json_backup(filetree):
-    data = '{"sources": ["_test_temp_\\\\testdir1","_test_temp_\\\\testdir2"],"exceptions": ["ex*"],"destination": "_test_temp_\\\\dest1","dry_run": false}'
+    data = '{"sources": ["_test_temp_/testdir1","_test_temp_/testdir2"],"exceptions": ["ex*"],"destination": "_test_temp_/dest1","dry_run": false}'
     filetree \
         .file("test.json", data) \
         .dir("testdir1") \

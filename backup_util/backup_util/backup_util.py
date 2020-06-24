@@ -1,4 +1,4 @@
-from ui import GUI
+from backup_util.ui import GUI
 import logging
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-from tkinter import LabelFrame, LEFT, NW, BOTH, Variable, Listbox, SINGLE, Frame, X, Button, RIGHT, \
+from tkinter import LabelFrame, LEFT, NW, BOTH, Listbox, SINGLE, Frame, X, Button, RIGHT, \
     simpledialog as simpledialog
-from ui.ui_model import UIModel
+from .ui_model import UIModel
 
 
 class ExclusionFrame(LabelFrame):
