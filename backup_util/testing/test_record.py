@@ -1,9 +1,10 @@
 import logging
+import os
+from time import sleep
 
 import pytest
 
-from time import sleep
-from records import *
+from records import MetaRecord, record_ext, record_folder, metarecord_name, Record
 from testing.FileTree import FileTree
 from testing.testutils import test_file_dir, temp_cleanup, rel_path
 
@@ -100,9 +101,9 @@ def test_load_latest_record(filetree):
 
 
 def test_diff_records(filetree):
-    filetree.dir("source_data")\
-        .file("junkA", deferred_content=["different things"])\
-        .file("junkB", deferred_content=["different things B"])\
+    filetree.dir("source_data") \
+        .file("junkA", deferred_content=["different things"]) \
+        .file("junkB", deferred_content=["different things B"]) \
         .build()
     mr = MetaRecord.create_new(test_file_dir)
     rec = Record.create_new("Rec A", "Rec A Data", test_file_dir)

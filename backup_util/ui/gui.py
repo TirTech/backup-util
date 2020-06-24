@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import PhotoImage, Frame, TOP, BOTH, Tk
 
 from icon import icon
 from ui.action_frame import ActionFrame
@@ -6,7 +6,7 @@ from ui.destination_frame import DestinationFrame
 from ui.exclusion_frame import ExclusionFrame
 from ui.source_frame import SourceFrame
 from ui.ui_model import UIModel
-import utils
+
 
 class GUI:
     def __init__(self):
@@ -21,11 +21,10 @@ class GUI:
         frm_config = Frame(self.root, padx=10, pady=10)
         frm_config.pack(side=TOP, fill=BOTH, expand=True)
 
-        frm_src = SourceFrame(frm_config, model)
-        frm_exc = ExclusionFrame(frm_config, model)
-        frm_dest = DestinationFrame(frm_config, model)
-
-        frm_action = ActionFrame(self.root, model)
+        SourceFrame(frm_config, model)
+        ExclusionFrame(frm_config, model)
+        DestinationFrame(frm_config, model)
+        ActionFrame(self.root, model)
 
     def start(self):
         self.root = Tk()

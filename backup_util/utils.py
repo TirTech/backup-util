@@ -1,11 +1,12 @@
 import datetime
-import json
-from typing import Any, Tuple, Optional
 import hashlib
+import json
 import os
 import re
+from typing import Any, Tuple, Optional
 
 _nonbmp = re.compile(r'[\U00010000-\U0010FFFF]')
+
 
 # https://stackoverflow.com/questions/40222971/python-find-equivalent-surrogate-pair-from-non-bmp-unicode-char
 def _surrogatepair(match):
@@ -16,8 +17,10 @@ def _surrogatepair(match):
             chr(int.from_bytes(encoded[:2], 'little')) +
             chr(int.from_bytes(encoded[2:], 'little')))
 
+
 def with_surrogates(text):
     return _nonbmp.sub(_surrogatepair, text)
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:

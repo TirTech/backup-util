@@ -28,13 +28,12 @@ class ManagedBackup(Backup):
         date = datetime.now()
         date_safe = date.strftime('%Y-%m-%d_%H-%M-%S')
 
-        # Create a record for this backup. Will hold all the needed information
         mr = MetaRecord.load_from(self.destination)
         if mr is None:
             mr = MetaRecord.create_new(self.destination)
         try:
             latest_record = mr.load_latest_record()
-        except NoRecordError as e:
+        except NoRecordError:
             latest_record = None
         rec = Record.create_new(f"Backup for {date_safe}", f"data_{date_safe}", self.destination, date)
 

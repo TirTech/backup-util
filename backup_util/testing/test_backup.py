@@ -1,12 +1,13 @@
 import logging
-import pytest
 import os
-import testing.testutils as testutils
-from testing.testutils import test_file_dir, rel_path
 
+import pytest
+
+import testing.testutils as testutils
 from Backup import Backup
-from testing.FileTree import FileTree
 from exception.ValidationException import ValidationException
+from testing.FileTree import FileTree
+from testing.testutils import test_file_dir, rel_path
 
 log = logging.getLogger(__name__)
 
@@ -45,11 +46,11 @@ def test_validation(filetree):
 def test_backup_simple(filetree):
     b = Backup(False)
     b.add_source(rel_path("testdir1"))
-    filetree\
-        .dir("testdir1")\
-            .file("testfile1")\
-            .up()\
-        .dir("dest1")\
+    filetree \
+        .dir("testdir1") \
+        .file("testfile1") \
+        .up() \
+        .dir("dest1") \
         .build()
     b.set_destination(rel_path("dest1"))
     b.execute()
@@ -80,13 +81,13 @@ def test_backup_exclusions(filetree):
     b = Backup(False)
     b.add_source(rel_path("testdir1"))
 
-    filetree\
+    filetree \
         .dir("testdir1") \
-            .file("testfile1") \
-            .dir("testdir2") \
-                .file("extestfile2") \
-                .root()\
-        .dir("dest1")\
+        .file("testfile1") \
+        .dir("testdir2") \
+        .file("extestfile2") \
+        .root() \
+        .dir("dest1") \
         .build()
 
     b.add_exception("ex*")
@@ -99,18 +100,19 @@ def test_backup_exclusions(filetree):
 
 
 def test_load_json_backup(filetree):
-    data = '{"sources": ["_test_temp_\\\\testdir1","_test_temp_\\\\testdir2"],"exceptions": ["ex*"],"destination": "_test_temp_\\\\dest1","dry_run": false}'
-    filetree\
-        .file("test.json", data)\
-        .dir("testdir1")\
-            .file("testfile1")\
-            .up()\
-        .dir("testdir2")\
-            .file("extestfile2")\
-            .up()\
-        .dir("dest1")\
+    data = '{"sources": ["_test_temp_\\\\testdir1","_test_temp_\\\\testdir2"],' \
+           '"exceptions": ["ex*"],"destination": "_test_temp_\\\\dest1","dry_run": false}'
+    filetree \
+        .file("test.json", data) \
+        .dir("testdir1") \
+        .file("testfile1") \
+        .up() \
+        .dir("testdir2") \
+        .file("extestfile2") \
+        .up() \
+        .dir("dest1") \
         .build()
-    src,exc,dest,dry,wrapped = Backup.load_from_json(rel_path("test.json"))
+    src, exc, dest, dry, wrapped = Backup.load_from_json(rel_path("test.json"))
     b = Backup(dry_run=dry, use_wrapper=wrapped)
     b.set_destination(dest)
     for s in src:
@@ -127,12 +129,12 @@ def test_load_json_backup(filetree):
 
 
 def test_file_tree(filetree):
-    filetree\
-        .dir("A")\
-            .dir("A1")\
-                .file("A1_F1")\
-                .up()\
-            .dir("A2")\
-                .file("A2_F1")\
-                .file("A2_F2")\
+    filetree \
+        .dir("A") \
+        .dir("A1") \
+        .file("A1_F1") \
+        .up() \
+        .dir("A2") \
+        .file("A2_F1") \
+        .file("A2_F2") \
         .build()

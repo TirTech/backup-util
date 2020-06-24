@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from queue import Queue
 from time import sleep
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple
 
 from exception.ValidationException import ValidationException
 import os
@@ -122,7 +122,10 @@ class Backup:
                 raise ValidationException(f"Validation failed: Source path {source} does not exist")
 
     def __str__(self):
-        return f"Backup[dry_run={self.dry_run},sources={str(self.sources)},destination={str(self.destination)},exceptions={str(self.exceptions)}]"
+        return f"Backup[dry_run={self.dry_run}," \
+               f"sources={str(self.sources)}," \
+               f"destination={str(self.destination)}," \
+               f"exceptions={str(self.exceptions)}]"
 
 
 class BackupUpdate:
