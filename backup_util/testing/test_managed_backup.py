@@ -97,7 +97,7 @@ def test_load_json_backup(filetree):
         .up() \
         .dir("dest1") \
         .build()
-    src, exc, dest, dry, wrapped, managed = ManagedBackup.load_from_json(rel_path("test.json"))
+    src, exc, dest, dry, wrapped = ManagedBackup.load_from_json(rel_path("test.json"))
     b = ManagedBackup(dry_run=dry)
     b.set_destination(dest)
     for s in src:

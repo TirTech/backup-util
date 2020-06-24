@@ -20,15 +20,16 @@ class DestinationFrame(LabelFrame):
         self.btn_dest_browse = Button(self, text="Browse", command=self.set_dest)
         self.btn_dest_browse.pack()
 
-        self.btn_make_managed = Button(self, text="Manage This Folder", command=self.set_managed)
+        def manage():
+            self.model.var_managed.set(True)
+
+        self.btn_make_managed = Button(self, text="Manage This Folder", command=manage)
         self.btn_make_managed.pack(side=BOTTOM)
 
         self.model.var_managed.trace_add("write", self.managed_changed)
 
     def managed_changed(self, *args):
-        self.set_managed(self.model.var_managed.get())
-
-    def set_managed(self, val=True):
+        val = self.model.var_managed.get()
         if val:
             self.chk_wrap.configure(state="disabled")
             self.btn_make_managed.configure(text="Already Managed", state="disabled")

@@ -54,7 +54,8 @@ class ManagedBackup(Backup):
                 data_queue.put(BackupUpdate(f"{code_copy_new} {src}", minor=True))
             else:  # In past record
                 if f.hash != fd.hash:  # Different contents
-                    shutil.copy2(f"{code_copy_changed} {src}", dest)
+                    shutil.copy2(src, dest)
+                    data_queue.put(BackupUpdate(f"{code_copy_changed} {src}", minor=True))
                 else:  # Same contents
                     fd.source = f.source
 
@@ -62,8 +63,11 @@ class ManagedBackup(Backup):
             destination = os.path.join(root_dest, os.path.basename(source))
             data_queue.put(BackupUpdate(f"Copying {source} to {destination}", index, len(self.sources)))
             log.info(f"Copying {source} to {destination}")
-            shutil.copytree(source, destination, False, ignore_func, copy_function=copy_func,
-                            ignore_dangling_symlinks=True)
+            try:
+                shutil.copytree(source, destination, False, ignore_func, copy_function=copy_func,
+                                ignore_dangling_symlinks=True)
+            except BaseException as e:
+                log.error(f"Error during copy: {str(e)}")
         rec.save(mr)
         mr.save()
         self.last_record = rec

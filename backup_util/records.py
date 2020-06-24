@@ -101,7 +101,7 @@ class MetaRecord:
     def add_record(self, record: Record):
         mre = MetaRecordEntry(record.timestamp, record.name)
         self.records.append(mre)
-        if self.latest is None or mre.timestamp > self.latest.timestamp:
+        if self.latest is None or mre.timestamp >= self.latest.timestamp:
             self.latest = mre
 
     def __jsonify__(self):
@@ -131,7 +131,7 @@ class Record:
             return cls(data, path)
 
     @classmethod
-    def create_new(cls, name: str, folder: str, path: str, date: datetime = datetime.datetime.now()) -> Record:
+    def create_new(cls, name: str, folder: str, path: str, date: datetime = None) -> Record:
         """
         Create a new backup record for a managed folder
 
@@ -144,7 +144,7 @@ class Record:
         return cls({
             "name": name,
             "folder": folder,
-            "timestamp": date.isoformat()
+            "timestamp": (date if date is not None else datetime.datetime.now()).isoformat()
         }, path)
 
     def save(self, metarecord: MetaRecord = None) -> None:

@@ -2,6 +2,7 @@ import logging
 
 import pytest
 
+from time import sleep
 from records import *
 from testing.FileTree import FileTree
 from testing.testutils import test_file_dir, temp_cleanup, rel_path
@@ -83,12 +84,14 @@ def test_load_latest_record(filetree):
     # is the oldest, not the first to be saved!
     mr = MetaRecord.create_new(test_file_dir)
     recA = Record.create_new("Rec A", "Rec A Data", test_file_dir)  # Oldest
+    sleep(2)
     recB = Record.create_new("Rec B", "Rec B Data", test_file_dir)  # Newest
     recB.save(mr)
     recA.save(mr)
     mr.save()
     latest = mr.load_latest_record()
     assert_records_same(latest, recB)
+    sleep(2)
     recC = Record.create_new("Rec C", "Rec C Data", test_file_dir)  # New Newest
     recC.save(mr)
     mr.save()
