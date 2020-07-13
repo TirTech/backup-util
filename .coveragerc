@@ -1,0 +1,12 @@
+[run]
+omit =
+    */backup_util/ui/*
+    */backup_util/icon.py
+    */backup_util/backup_util.py
+    */backup_util/utils/tkutils.py
+
+[report]
+precision = 1
+
+[html]
+directory = coverage_html
