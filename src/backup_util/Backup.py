@@ -1,27 +1,27 @@
+import json
 import logging
+import os
+import shutil
 from datetime import datetime
 from queue import Queue
 from time import sleep
-from typing import Union, Tuple
+from typing import Tuple
 
 from backup_util.exception.ValidationException import ValidationException
-import os
-import shutil
-import json
-from threading import Thread
+from backup_util.utils.threading import AsyncUpdate, Threadable, threaded_func
 
 log = logging.getLogger(__name__)
 
 
-class Backup:
+class Backup(Threadable):
 
     def __init__(self, dry_run: bool = False, use_wrapper=False):
+        super().__init__()
         self.dry_run: bool = dry_run
         self.use_wrapper = use_wrapper
         self.sources: list = []
         self.destination: str = ""
         self.exceptions: list = []
-        self.thread: Union[Thread, None] = None
 
     def add_source(self, source: str) -> None:
         self.sources.append(source)
@@ -58,16 +58,13 @@ class Backup:
         self.validate()
         log.info(f"Starting tree copy of {self.sources} to {self.destination}")
 
-        data_queue = Queue()
         if not self.dry_run:
-            self.thread = ThrowingThread(target=self._backup_thread, args=[data_queue])
+            return self._backup_thread()
         else:
-            self.thread = ThrowingThread(target=self._backup_thread_dry, args=[data_queue])
+            return self._backup_thread_dry()
 
-        self.thread.start()
-        return data_queue
-
-    def _backup_thread(self, data_queue: Queue) -> None:
+    @threaded_func()
+    def _backup_thread(self, data_queue: Queue):
         ignore_func = shutil.ignore_patterns(*self.exceptions)
         root_dest = self.destination
         if self.use_wrapper:
@@ -86,7 +83,8 @@ class Backup:
                             ignore_dangling_symlinks=True)
         data_queue.put(AsyncUpdate("Complete", len(self.sources), len(self.sources)))
 
-    def _backup_thread_dry(self, data_queue: Queue) -> None:
+    @threaded_func()
+    def _backup_thread_dry(self, data_queue: Queue):
         for i in range(1, 11):
             data_queue.put(AsyncUpdate("Update" + ("!" * i), i, 10))
             sleep(0.25)
@@ -97,15 +95,6 @@ class Backup:
             data_queue.put(AsyncUpdate("Minor Update 3", minor=True))
             sleep(0.25)
             data_queue.put(AsyncUpdate("Minor Update 4", minor=True))
-
-    def is_running(self):
-        return self.thread is not None and self.thread.is_alive()
-
-    def wait_for_completion(self):
-        if self.thread is not None and self.thread.is_alive():
-            e = self.thread.join()
-            if e is not None:
-                raise e
 
     def validate(self):
         """
@@ -126,36 +115,3 @@ class Backup:
                f"sources={str(self.sources)}," \
                f"destination={str(self.destination)}," \
                f"exceptions={str(self.exceptions)}]"
-
-
-class AsyncUpdate:
-    def __init__(self, message: str, progress: int = 1, progress_max: int = 1, minor: bool = False):
-        self.progress = progress
-        self.progress_max = progress_max
-        self.message = message
-        self.minor = minor
-
-    def get_completion(self) -> float:
-        return round(float(self.progress / self.progress_max) * 100, 2)
-
-    def is_minor(self):
-        return self.minor
-
-
-class ThrowingThread(Thread):
-    def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs=None, *, daemon=None):
-        super().__init__(group=group, target=target, name=name,
-                         args=args, kwargs=kwargs, daemon=daemon)
-        self.exception = None
-
-    def run(self):
-        self.exception = None
-        try:
-            super().run()
-        except BaseException as e:
-            self.exception = e
-
-    def join(self, timeout=None) -> BaseException:
-        super().join(timeout)
-        return self.exception

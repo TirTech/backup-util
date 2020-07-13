@@ -1,8 +1,6 @@
 from tkinter import StringVar, BooleanVar, Variable
-from typing import Optional
 
-from backup_util.utils import WatchedVariable
-from backup_util.managed import MetaRecord
+from backup_util.utils.tkutils import WatchedVariable
 
 
 class ConfigUIModel:

@@ -1,9 +1,12 @@
-import distutils
-from tkinter import TOP, N, BOTH, Toplevel, END, BOTTOM, S, RIGHT, W
+import queue
+from queue import Queue
+from tkinter import TOP, N, BOTH, Toplevel, END, BOTTOM, S, RIGHT, W, X
 from tkinter.ttk import Frame, Treeview, Button
 
+from backup_util.utils.threading import AsyncUpdate
 from backup_util.managed import MetaRecord
 from backup_util.managed import Rebuilder
+from .status_frame import StatusFrame
 
 
 class RebuildDialog(Frame):
@@ -28,11 +31,30 @@ class RebuildDialog(Frame):
         self.btn_gen = Button(self.frm_btns, text="Generate Records", command=self._generate)
         self.btn_gen.pack(side=RIGHT, anchor=W)
 
+        self.frm_status = StatusFrame(self)
+        self.frm_status.pack(side=TOP, anchor=N, fill=X, expand=True)
+
         self.rebuilder = Rebuilder(mr)
         self._setup_tree()
 
     def _generate(self):
-        self.rebuilder.generate_records()
+        queue = self.rebuilder.generate_records()
+        self.listen_for_result(queue)
+
+    def listen_for_result(self, data_queue: Queue):
+        try:
+            while not data_queue.empty():
+                res: AsyncUpdate = data_queue.get_nowait()
+                if not res.is_minor():
+                    self.frm_status.set_major(f"[{res.get_completion()}%] {res.message}")
+                    self.frm_status.set_progress(res.get_completion())
+                else:
+                    self.frm_status.set_minor(f"|> {res.message}")
+        except queue.Empty:
+            pass
+        finally:
+            if self.rebuilder.thread is not None and (self.rebuilder.thread.is_alive() or not data_queue.empty()):
+                self.after(100, lambda: self.listen_for_result(data_queue))
 
     def _toggle_include(self):
         for item in self.tree.selection():

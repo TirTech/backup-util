@@ -3,7 +3,6 @@ from tkinter.ttk import Button, Checkbutton, LabelFrame, Entry
 
 from backup_util.managed import MetaRecord
 from .ui_model import ConfigUIModel
-from backup_util import utils
 
 
 class DestinationFrame(LabelFrame):

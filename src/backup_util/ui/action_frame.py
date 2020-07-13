@@ -4,7 +4,8 @@ from tkinter import BOTTOM, X, TOP, StringVar, W, DoubleVar, RIGHT, BooleanVar, 
 from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar
 from typing import Union
 
-from backup_util.Backup import Backup, AsyncUpdate
+from backup_util.Backup import Backup
+from backup_util.utils.threading import AsyncUpdate
 from backup_util.managed import ManagedBackup
 from backup_util.exception.ValidationException import ValidationException
 from backup_util.managed import MetaRecord
@@ -114,7 +115,7 @@ class ActionFrame(Frame):
         except queue.Empty:
             pass
         finally:
-            if self.bk.is_running():
+            if self.bk.is_running() or not data_queue.empty():
                 self.after(100, lambda: self.listen_for_result(data_queue))
             else:
                 self.bk = None

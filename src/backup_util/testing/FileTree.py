@@ -66,5 +66,11 @@ class FileTree:
             with open(os.path.join(self.path, path), "r") as f:
                 return f.readlines()
 
-    def relpath(self, *path):
+    def relpath(self, *path) -> str:
+        """
+        Return the absolute path to the file specified. `path` should be a path fragment relative to this file tree
+
+        :param path: the filetree-relative path fragment
+        :return: the absolute path
+        """
         return os.path.join(self.path, *path)

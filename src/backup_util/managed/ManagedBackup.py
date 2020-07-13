@@ -5,8 +5,9 @@ from datetime import datetime
 from queue import Queue
 from typing import Optional
 
-from backup_util import utils
-from backup_util.Backup import Backup, AsyncUpdate
+from backup_util.Backup import Backup
+from backup_util.utils.datautils import path_common_suffix, find_match
+from backup_util.utils.threading import AsyncUpdate, threaded_func
 from .records import Record, MetaRecord, NoRecordError
 
 log = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class ManagedBackup(Backup):
         super().__init__(dry_run, True)
         self.last_record: Optional[Record] = None
 
+    @threaded_func()
     def _backup_thread(self, data_queue: Queue) -> None:
         self.last_record = None
         ignore_func = shutil.ignore_patterns(*self.exceptions)
@@ -41,13 +43,12 @@ class ManagedBackup(Backup):
         root_dest = rec.data_path()
         os.mkdir(root_dest)
 
-        # TODO rewrite to check files and conditionally copy
         def copy_func(src, dest):
             data_queue.put(AsyncUpdate(f"{code_check} {src}", minor=True))
-            fd = rec.add_file(src, utils.path_common_suffix(src, dest))
+            fd = rec.add_file(src, path_common_suffix(src, dest))
 
-            i, f = utils.find_match(latest_record.files,
-                                    lambda x: x.file == fd.file) if latest_record is not None else (None, None)
+            i, f = find_match(latest_record.files,
+                              lambda x: x.file == fd.file) if latest_record is not None else (None, None)
             if i is None:  # Not in past record.
                 shutil.copy2(src, dest)
                 data_queue.put(AsyncUpdate(f"{code_copy_new} {src}", minor=True))

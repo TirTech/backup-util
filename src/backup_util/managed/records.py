@@ -6,7 +6,7 @@ import os
 from functools import reduce
 from typing import List, Tuple, Optional
 
-from backup_util import utils
+from backup_util.utils.datautils import hash_file, find_match, CustomJSONEncoder
 
 record_ext = ".rec.json"
 record_folder = "records"
@@ -77,6 +77,8 @@ class MetaRecord:
 
     @staticmethod
     def is_managed(path: str) -> bool:
+        if path is None:
+            return False
         abspath = os.path.join(path, record_folder, metarecord_name)
         return os.path.exists(abspath) and os.path.isfile(abspath)
 
@@ -101,7 +103,7 @@ class MetaRecord:
             if not os.path.exists(recpath):
                 os.mkdir(recpath)
             with open(os.path.join(recpath, metarecord_name), "w+") as file:
-                json.dump(self, file, cls=utils.CustomJSONEncoder)
+                json.dump(self, file, cls=CustomJSONEncoder)
         else:
             raise FileNotFoundError(f"The path {self.path} does not exist")
 
@@ -159,7 +161,7 @@ class Record:
             if not os.path.exists(recpath):
                 os.mkdir(recpath)
             with open(os.path.join(recpath, f"{self.name}{record_ext}"), "w+") as file:
-                json.dump(self, file, cls=utils.CustomJSONEncoder)
+                json.dump(self, file, cls=CustomJSONEncoder)
         else:
             raise NotADirectoryError(f"The path {self.path} does not exist or is not a directory")
 
@@ -173,11 +175,16 @@ class Record:
         :param source: the name of the backup where this file is located
         :return: a `FileData` object for the new file
         """
-        file = FileData(relative_path, utils.hash_file(abs_path), source if source is not None else self.name)
+        file = FileData(relative_path, hash_file(abs_path), source if source is not None else self.name)
         self.files.append(file)
         return file
 
     def data_path(self) -> str:
+        """
+        Get the absolute path of the data folder for this record
+
+        :return: the path to the data directory
+        """
         return os.path.join(self.path, self.folder)
 
     def __jsonify__(self) -> dict:
@@ -188,32 +195,33 @@ class Record:
             "files": self.files
         }
 
-    def file_diff(self, rec: Record) -> Tuple[List[FileData], List[FileData], List[FileData]]:
+    def file_diff(self, rec: Record) -> Tuple[
+        List[FileData], List[Tuple[FileData, FileData]], List[FileData], List[Tuple[FileData, FileData]]]:
         """
-        Returns the added, changed, and removed files as a tuple (in that order)
-        between this record and the previous. A change is considered chronologically.
-        I.e. if ``rec`` is older that ``self``, a file that exists in ``rec`` but not in ``self`` was *deleted*, whereas
-        if ``rec`` is newer that same file was *created*.
+        Returns the added, changed, removed, and unchanged files as a tuple (in that order)
+        between this record and the previous. A change is considered with self being older
+
+        :param rec: the record to diff against
+        :return: the added, changed, removed, and unchanged FileData objects
         """
         removed = []
         changed = []
+        unchanged = []
         sfiles = self.files.copy()
         recfiles = rec.files.copy()
         for i, f in enumerate(sfiles):
-            p, v = utils.find_match(recfiles, lambda x: x.file == f.file)
+            p, v = find_match(recfiles, lambda x: x.file == f.file)
             if p is None:
                 removed.append(f)
             else:
                 if v.hash != f.hash:
-                    changed.append(f)
+                    changed.append((f, v))
+                else:
+                    unchanged.append((f, v))
                 recfiles.remove(v)
         added = recfiles
 
-        # Considered self as oldest, confirm or swap created/deleted
-        if self.timestamp < rec.timestamp:
-            return added, changed, removed
-        else:
-            return removed, changed, added
+        return added, changed, removed, unchanged
 
     def __eq__(self, other) -> bool:
         def file_reduce(acc, v):

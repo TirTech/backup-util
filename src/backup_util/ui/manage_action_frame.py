@@ -1,4 +1,5 @@
 from tkinter import BOTTOM, X, TOP, RIGHT, filedialog as filedialog, BOTH
+from tkinter.messagebox import askyesno
 from tkinter.ttk import Frame, Button, LabelFrame
 
 from backup_util.managed import MetaRecord
@@ -19,5 +20,13 @@ class ManageActionFrame(LabelFrame):
 
     def choose_folder(self):
         dest = filedialog.askdirectory(title="Choose Destination")
-        if dest is not None and MetaRecord.is_managed(dest):
+        if MetaRecord.is_managed(dest):
             self.model.var_metarecord.set(MetaRecord.load_from(dest))
+        elif dest is not None:
+            res = askyesno("Folder Manager - Choose Folder", "This folder is not managed yet.\nWould you like to manage this folder?")
+            if res:
+                mr = MetaRecord.create_new(dest)
+                mr.save()
+                self.model.var_metarecord.set(mr)
+            else:
+                self.model.var_metarecord.set(None)

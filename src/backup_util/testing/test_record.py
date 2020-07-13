@@ -88,22 +88,26 @@ def test_diff_records(filetree):
     filetree.dir("source_data") \
         .file("junkA", deferred_content=["different things"]) \
         .file("junkB", deferred_content=["different things B"]) \
+        .file("junkC") \
         .build()
     mr = MetaRecord.create_new(filetree.path)
     rec = Record(filetree.path, "Rec A", "Rec A Data")
     rec.add_file(filetree.relpath("source_data/junkA"), filetree.relpath("source_data/junkA"))
     rec.add_file(filetree.relpath("source_data/junkB"), filetree.relpath("source_data/junkB"))
+    rec.add_file(filetree.relpath("source_data/junkC"), filetree.relpath("source_data/junkC"))
     rec.save(mr)
     mr.save()
     filetree.root().do_deferred()
     rec2 = Record(filetree.path, "Rec A - 2", "Rec A Data")
     rec2.add_file(filetree.relpath("source_data/junkA"), filetree.relpath("source_data/junkA"))
     rec2.add_file(filetree.relpath("source_data/junkB"), filetree.relpath("source_data/junkB"))
+    rec2.add_file(filetree.relpath("source_data/junkC"), filetree.relpath("source_data/junkC"))
     rec2.save(mr)
     mr.save()
-    add, chg, rm = rec2.file_diff(rec)
+    add, chg, rm, uchg = rec.file_diff(rec2)
     assert len(add) == 0
     assert len(chg) == 2
     assert len(rm) == 0
-    assert chg[0] == rec2.files[0]
-    assert chg[1] == rec2.files[1]
+    assert len(uchg) == 1
+    assert chg[0][1] == rec2.files[0]
+    assert chg[1][1] == rec2.files[1]
