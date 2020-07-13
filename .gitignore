@@ -4,3 +4,4 @@ coverage_html/
 dist/
 .coverage
 coverage.xml
+*__pycache__*
