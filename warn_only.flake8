@@ -1,0 +1,7 @@
+[flake8]
+# This config should be invoked with --exit-zero
+count = True
+max-line-length = 127
+show-source = True
+max-complexity = 10
+statistics = True
