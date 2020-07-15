@@ -5,6 +5,8 @@ from typing import Any, Optional, Callable, List, NewType
 import PIL
 from PIL import Image, ImageTk, ImageOps
 
+from backup_util.utils.datautils import get_data_path
+
 ObsCallback = NewType('ObsCallback', Callable[[Any, Any], None])
 
 
@@ -55,7 +57,7 @@ def load_image(name: str, width=None, height=None, color=None) -> PhotoImage:
     :param color: the new color of the image if loading from a black and white image
     :return: the image as a `PhotoImage` for use with Tk
     """
-    img: PIL.Image.Image = Image.open(f"backup_util/images/{name}.png")
+    img: PIL.Image.Image = Image.open(get_data_path(f"backup_util/images/{name}.png"))
     if width is not None or height is not None:
         w = width if width is not None else height
         h = height if height is not None else width

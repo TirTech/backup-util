@@ -11,6 +11,7 @@ from .manage_action_frame import ManageActionFrame
 from .source_frame import SourceFrame
 from .tree_frame import TreeFrame
 from .ui_model import ConfigUIModel, ManageUIModel
+from ..utils.datautils import get_data_path
 
 custom_theme_folder = "backup_util/ttktheme_custom"
 custom_theme_name = "arc_custom"
@@ -59,7 +60,7 @@ class GUI:
 
     def start(self):
         self.root = ThemedTk(themebg=True)
-        self.root.tk.eval("source {}/pkgIndex.tcl".format(custom_theme_folder))
+        self.root.tk.eval("source {}/pkgIndex.tcl".format(get_data_path(custom_theme_folder)))
         self.root.set_theme(custom_theme_name)
         # self.root.set_theme("arc")
         # self.root.set_theme_advanced("arc", brightness=1, saturation=1.0, hue=1,

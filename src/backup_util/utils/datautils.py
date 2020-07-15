@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import os
+import sys
 from typing import Any, Tuple, Optional
 
 
@@ -48,3 +49,11 @@ def path_common_suffix(p1: str, p2: str) -> str:
         head1, tail1 = os.path.split(head1)
         head2, tail2 = os.path.split(head2)
     return res
+
+
+def get_data_path(file: str) -> str:
+    if hasattr(sys, 'frozen') and hasattr(sys, '_MEIPASS'):
+        bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+        return os.path.join(bundle_dir, file).replace('\\', '/')
+    else:
+        return file

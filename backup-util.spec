@@ -3,10 +3,9 @@
 block_cipher = None
 
 
-a = Analysis(['backup_util\\backup_util.py'],
-             pathex=['D:\\Projects\\backup-util'],
+a = Analysis(['src\\launch.py'],
              binaries=[],
-             datas=[('backup_util/icon.ico', 'icon.ico')],
+             datas=[('src/backup_util/icon.ico', '.'),('src/backup_util/ttktheme_custom/', 'backup_util/ttktheme_custom'),('src/backup_util/images/', 'backup_util/images')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -24,10 +23,10 @@ exe = EXE(pyz,
           a.datas,
           [],
           name='Backup Util',
-          debug=False,
+          debug=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='backup_util\\icon.ico')
+          console=True , icon='src\\backup_util\\icon.ico')
