@@ -8,7 +8,7 @@ class AsyncUpdate:
     def __init__(self, message: str, progress: int = 1, progress_max: int = 1, minor: bool = False):
         self.progress = progress
         self.progress_max = progress_max
-        self.message = message
+        self.message = message.rstrip("\n")
         self.minor = minor
 
     def get_completion(self) -> float:
@@ -46,8 +46,8 @@ def threaded_func():
             def _thread_exec():
                 try:
                     res = f(self, data_queue, *args, *kwargs)
-                finally:
-                    self.thread = None
+                except BaseException as e:
+                    raise e
                 return res
             self.thread = ThrowingThread(target=_thread_exec)
             self.thread.start()
@@ -59,7 +59,7 @@ def threaded_func():
 class Threadable:
 
     def __init__(self):
-        self.thread: Union[Thread, None] = None
+        self.thread: Union[ThrowingThread, None] = None
         super().__init__()
 
     def is_running(self):
@@ -71,3 +71,8 @@ class Threadable:
             if e is not None:
                 raise e
 
+    def get_error(self) -> str:
+        if self.thread is not None and self.thread.exception is not None:
+            return str(self.thread.exception)
+        else:
+            return ""

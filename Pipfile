@@ -4,9 +4,16 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest = "~=5.4.3"
+pytest-cov = "~=2.10.0"
+flake8 = "~=3.8.3"
+black = "*"
 
 [packages]
-pillow = "*"
+ttkthemes = "~=3.1.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
