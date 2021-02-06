@@ -17,6 +17,7 @@ jobs:
     - name: Set up Python 3.8
       run: |
         sudo apt-get install python3
+        sudo ln -s /bin/python3 /bin/python
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
